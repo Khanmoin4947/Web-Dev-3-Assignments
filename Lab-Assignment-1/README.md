@@ -1,37 +1,50 @@
 # Smart Utility Toolkit
 
-This project implements the lab assignment requirements for Node.js core modules:
+A package-free Node.js lab assignment demonstrating command-line input, custom modules, HTTP routing, asynchronous file operations, and secure randomness. It uses only Node.js core modules.
 
-- CLI calculator using `process.argv`
-- Reusable custom module using `module.exports` and `require()`
-- HTTP server with multiple routes using the `http` module
-- File manager using `fs` methods (`writeFile`, `readFile`, `appendFile`, `unlink`)
-- Random dice generator using the `crypto` module
-- Logging utility with timestamps
+## Requirements
 
-## Files
+- Node.js 18 or later
+- No `npm install` is needed
 
-- `calculator.js` — CLI calculator
-- `server.js` — HTTP server with `/`, `/about`, `/contact`, and 404 handling
-- `fileManager.js` — create, read, update, and delete a demo file
-- `dice.js` — random dice roll simulator
-- `utils/isEven.js` — reusable custom module
-- `utils/logger.js` — timestamped logger
-
-## Run commands
+## Run the utilities
 
 ```bash
+# CLI calculator
 node calculator.js add 10 5
-node dice.js 3
-node fileManager.js create
-node fileManager.js read
-node fileManager.js update
-node fileManager.js delete
+node calculator.js divide 12 3
+
+# Custom module demonstration
+node app.js 11
+
+# HTTP server (visit /, /about, /contact, or an invalid route)
 node server.js
+
+# File manager: action, optional filename, optional text
+node fileManager.js create notes.txt "First line"
+node fileManager.js read notes.txt
+node fileManager.js update notes.txt "Second line"
+node fileManager.js delete notes.txt
+
+# Secure crypto dice rolls
+node dice.js 3
 ```
 
-Then open:
+Set a custom server port with `PORT=4000 node server.js` (PowerShell: `$env:PORT=4000; node server.js`).
 
-- http://localhost:3000/
-- http://localhost:3000/about
-- http://localhost:3000/contact
+## Project structure
+
+```text
+smart-utility-toolkit/
+├── calculator.js      # process.argv calculator
+├── app.js             # reuses custom modules
+├── server.js          # http server and routes
+├── fileManager.js     # fs CRUD operations
+├── dice.js            # crypto dice simulator
+├── test.txt
+└── modules/
+    ├── isEven.js
+    └── logger.js
+```
+
+`fileManager.js` deliberately uses callback-based asynchronous `fs` methods. Its "scheduled" log appears before the operation's success/failure callback, making execution order observable.

@@ -1,29 +1,36 @@
+'use strict';
+
 const http = require('http');
-const { log } = require('./utils/logger');
+const { log } = require('./modules/logger');
 
-const PORT = process.env.PORT || 3000;
+const port = Number(process.env.PORT) || 3000;
 
-const server = http.createServer((req, res) => {
-  const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-  const pathname = url.pathname;
+const routes = {
+  '/': 'Welcome to the Smart Utility Toolkit server!',
+  '/about': 'About: this server demonstrates Node.js HTTP routing.',
+  '/contact': 'Contact: smart-toolkit@example.com',
+};
 
-  log(`Incoming request: ${pathname}`, 'REQUEST');
+const server = http.createServer((request, response) => {
+  const path = new URL(request.url, `http://${request.headers.host}`).pathname;
+  log(`${request.method} ${path}`);
 
-  if (pathname === '/') {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Welcome to the Smart Utility Toolkit!');
-  } else if (pathname === '/about') {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('This is the About page for the Smart Utility Toolkit.');
-  } else if (pathname === '/contact') {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Contact us: support@smarttoolkit.local');
-  } else {
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('404 Error: Page not found.');
+  response.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  if (request.method !== 'GET') {
+    response.writeHead(405);
+    response.end('405 Method Not Allowed');
+    return;
   }
+
+  if (routes[path]) {
+    response.writeHead(200);
+    response.end(routes[path]);
+    return;
+  }
+
+  response.writeHead(404);
+  response.end('404 Not Found');
 });
 
-server.listen(PORT, () => {
-  log(`Server running at http://localhost:${PORT}`, 'SERVER');
-});
+server.listen(port, () => log(`Server listening at http://localhost:${port}`));
+

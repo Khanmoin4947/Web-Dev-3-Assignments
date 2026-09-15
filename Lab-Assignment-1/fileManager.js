@@ -1,73 +1,51 @@
+#!/usr/bin/env node
+'use strict';
+
 const fs = require('fs');
 const path = require('path');
-const { log } = require('./utils/logger');
+const { log } = require('./modules/logger');
 
-const filePath = path.join(__dirname, 'demo.txt');
+// Usage: node fileManager.js <create|read|update|delete> [file] [text]
+const [, , action, fileName = 'test.txt', ...textParts] = process.argv;
+const filePath = path.resolve(__dirname, fileName);
+const text = textParts.join(' ') || 'Sample text written by Smart Utility Toolkit.\n';
 
-function createFile() {
-  const content = 'This file was created by the Smart Utility Toolkit.\nNode.js file operations demo.\n';
-  fs.writeFile(filePath, content, (err) => {
-    if (err) {
-      log(`Create failed: ${err.message}`, 'ERROR');
-      return;
-    }
-    log(`File created successfully: ${filePath}`, 'SUCCESS');
-  });
+const actions = {
+  create() {
+    log(`Creating ${fileName}...`);
+    fs.writeFile(filePath, text, 'utf8', (error) => {
+      if (error) return console.error(`Create failed: ${error.message}`);
+      console.log(`Created: ${fileName}`);
+    });
+  },
+  read() {
+    log(`Reading ${fileName}...`);
+    fs.readFile(filePath, 'utf8', (error, data) => {
+      if (error) return console.error(`Read failed: ${error.message}`);
+      console.log(`Contents of ${fileName}:\n${data}`);
+    });
+  },
+  update() {
+    log(`Updating ${fileName}...`);
+    fs.appendFile(filePath, text, 'utf8', (error) => {
+      if (error) return console.error(`Update failed: ${error.message}`);
+      console.log(`Updated: ${fileName}`);
+    });
+  },
+  delete() {
+    log(`Deleting ${fileName}...`);
+    fs.unlink(filePath, (error) => {
+      if (error) return console.error(`Delete failed: ${error.message}`);
+      console.log(`Deleted: ${fileName}`);
+    });
+  },
+};
+
+if (!action || !actions[action]) {
+  console.error('Usage: node fileManager.js <create|read|update|delete> [file] [text]');
+  process.exitCode = 1;
+} else {
+  actions[action]();
+  log('File operation was scheduled asynchronously.');
 }
 
-function readFile() {
-  fs.readFile(filePath, 'utf8', (err, data) => {
-    if (err) {
-      log(`Read failed: ${err.message}`, 'ERROR');
-      return;
-    }
-    log('File content read successfully', 'SUCCESS');
-    console.log('Content:\n' + data);
-  });
-}
-
-function updateFile() {
-  const updatedContent = 'Updated file content using fs.appendFile().\n';
-  fs.appendFile(filePath, updatedContent, (err) => {
-    if (err) {
-      log(`Update failed: ${err.message}`, 'ERROR');
-      return;
-    }
-    log('File updated successfully', 'SUCCESS');
-  });
-}
-
-function deleteFile() {
-  fs.unlink(filePath, (err) => {
-    if (err) {
-      log(`Delete failed: ${err.message}`, 'ERROR');
-      return;
-    }
-    log(`File deleted successfully: ${filePath}`, 'SUCCESS');
-  });
-}
-
-function main() {
-  const action = process.argv[2];
-  log('File manager started', 'START');
-
-  switch (action) {
-    case 'create':
-      createFile();
-      break;
-    case 'read':
-      readFile();
-      break;
-    case 'update':
-      updateFile();
-      break;
-    case 'delete':
-      deleteFile();
-      break;
-    default:
-      console.log('Usage: node fileManager.js <create|read|update|delete>');
-      log('Invalid file manager action', 'ERROR');
-  }
-}
-
-main();

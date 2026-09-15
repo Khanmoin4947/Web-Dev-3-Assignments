@@ -1,23 +1,20 @@
+#!/usr/bin/env node
+'use strict';
+
 const crypto = require('crypto');
-const { log } = require('./utils/logger');
+const { log } = require('./modules/logger');
 
-function rollDice() {
-  const randomValue = crypto.randomInt(1, 7);
-  console.log(`Dice Rolled: ${randomValue}`);
-  return randomValue;
-}
+const requestedRolls = process.argv[2] ?? '1';
+const rolls = Number(requestedRolls);
 
-function simulateRolls(count = 5) {
-  log('Dice simulation started', 'START');
-  for (let i = 1; i <= count; i += 1) {
-    rollDice();
+if (!Number.isInteger(rolls) || rolls < 1 || rolls > 100) {
+  console.error('Provide a whole number of rolls from 1 to 100. Example: node dice.js 3');
+  process.exitCode = 1;
+} else {
+  log(`Rolling ${rolls} dice...`);
+  for (let index = 1; index <= rolls; index += 1) {
+    const value = crypto.randomInt(1, 7);
+    console.log(`Dice Rolled (${index}): ${value}`);
   }
-  log(`Completed ${count} dice rolls`, 'SUCCESS');
 }
 
-function main() {
-  const count = Number(process.argv[2]) || 5;
-  simulateRolls(count);
-}
-
-main();

@@ -1,58 +1,39 @@
-const { isEven } = require('./utils/isEven');
-const { log } = require('./utils/logger');
+#!/usr/bin/env node
+'use strict';
 
-function calculate(operation, a, b) {
-  const num1 = Number(a);
-  const num2 = Number(b);
+// Usage: node calculator.js <add|subtract|multiply|divide> <number> <number>
+const [, , operation, firstValue, secondValue] = process.argv;
 
-  if (!Number.isFinite(num1) || !Number.isFinite(num2)) {
-    throw new Error('Both values must be valid numbers.');
-  }
+console.log('Calculator started. Arguments:', process.argv.slice(2));
 
-  switch (operation) {
-    case 'add':
-      return num1 + num2;
-    case 'subtract':
-      return num1 - num2;
-    case 'multiply':
-      return num1 * num2;
-    case 'divide':
-      if (num2 === 0) {
-        throw new Error('Division by zero is not allowed.');
-      }
-      return num1 / num2;
-    default:
-      throw new Error(`Unsupported operation: ${operation}`);
-  }
-}
+const left = Number(firstValue);
+const right = Number(secondValue);
 
-function printUsage() {
-  console.log('Usage: node calculator.js <add|subtract|multiply|divide> <number1> <number2>');
-}
-
-function main() {
-  const args = process.argv.slice(2);
-
-  log('CLI calculator started', 'START');
-  console.log('Command arguments:', args);
-
-  if (args.length < 3) {
-    printUsage();
-    return;
-  }
-
-  const [operation, value1, value2] = args;
+if (!operation || firstValue === undefined || secondValue === undefined) {
+  console.error('Usage: node calculator.js <add|subtract|multiply|divide> <number> <number>');
+  process.exitCode = 1;
+} else if (!Number.isFinite(left) || !Number.isFinite(right)) {
+  console.error('Error: both values must be valid finite numbers.');
+  process.exitCode = 1;
+} else {
+  const operations = {
+    add: () => left + right,
+    subtract: () => left - right,
+    multiply: () => left * right,
+    divide: () => {
+      if (right === 0) throw new Error('cannot divide by zero');
+      return left / right;
+    },
+  };
 
   try {
-    const result = calculate(operation.toLowerCase(), value1, value2);
-    console.log(`Result: ${result}`);
-    console.log(`Is result even? ${isEven(result) ? 'Yes' : 'No'}`);
-    log(`Calculation completed: ${operation} ${value1} ${value2} = ${result}`, 'RESULT');
+    if (!operations[operation]) {
+      throw new Error(`unsupported operation "${operation}"`);
+    }
+    console.log(`Result: ${operations[operation]()}`);
   } catch (error) {
-    console.error('Error:', error.message);
-    printUsage();
-    log(`Calculation failed: ${error.message}`, 'ERROR');
+    console.error(`Error: ${error.message}`);
+    process.exitCode = 1;
   }
 }
 
-main();
